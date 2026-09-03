@@ -1,10 +1,10 @@
 const DEMO_CREATORS=[
- {name:'Aarav',handle:'@aarav',bio:'building things on the internet ✦',seed:'Aarav',badge:'✓'},
- {name:'Nova',handle:'@nova',bio:'art • music • late nights',seed:'Nova',badge:'★'},
- {name:'Pixel',handle:'@pixel',bio:'designer & digital creator',seed:'Pixel',badge:'✦'},
- {name:'Lumi',handle:'@lumi',bio:'just making the web prettier',seed:'Lumi',badge:'✓'},
- {name:'Kai',handle:'@kai',bio:'games, code and coffee',seed:'Kai',badge:'★'},
- {name:'Milo',handle:'@milo',bio:'photography / motion / life',seed:'Milo',badge:'✦'}
+{name:'Aarav',handle:'@aarav',bio:'building things on the internet ✦',seed:'Aarav',badge:'✓',tag:'creator'},
+{name:'Nova',handle:'@nova',bio:'art • music • late nights',seed:'Nova',badge:'★',tag:'music'},
+{name:'Pixel',handle:'@pixel',bio:'designer & digital creator',seed:'Pixel',badge:'✦',tag:'designer'},
+{name:'Lumi',handle:'@lumi',bio:'making the web prettier',seed:'Lumi',badge:'✓',tag:'designer'},
+{name:'Kai',handle:'@kai',bio:'games, code and coffee',seed:'Kai',badge:'★',tag:'gaming'},
+{name:'Milo',handle:'@milo',bio:'photography / motion / life',seed:'Milo',badge:'✦',tag:'creator'}
 ];
 const OWNER_EMAIL='aaravg78201333@gmail.com';
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);
@@ -13,119 +13,38 @@ const saveUsers=u=>localStorage.setItem('spiderSenseUsers',JSON.stringify(u));
 const current=()=>JSON.parse(localStorage.getItem('spiderSenseCurrent')||'null');
 const setCurrent=u=>u?localStorage.setItem('spiderSenseCurrent',JSON.stringify(u)):localStorage.removeItem('spiderSenseCurrent');
 const esc=s=>String(s??'').replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[m]));
-
-function show(view){
-  $$('.view').forEach(v=>v.classList.remove('active'));
-  const el=$('#'+view); if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
-}
-function creatorList(){
-  const users=getUsers().map(u=>({name:u.name,handle:'@'+u.username,bio:u.bio||'creator on Spider Sense',seed:u.username,badge:u.badge||'✦'}));
-  return [...users,...DEMO_CREATORS];
-}
-function renderCreators(list=creatorList()){
-  const grid=$('#creatorGrid'); if(!grid)return;
-  grid.innerHTML=list.map(c=>`<article class="creator" data-profile="${esc(c.handle.replace('@',''))}"><div class="creator-top"><img src="https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(c.seed)}" alt=""><div><h3>${esc(c.name)} <span class="badge">${esc(c.badge)}</span></h3><small>${esc(c.handle)}</small></div></div><p>${esc(c.bio)}</p><button class="link-demo profile-open" data-user="${esc(c.handle.replace('@',''))}">Visit profile <span>↗</span></button></article>`).join('')||'<p>No creators found.</p>';
-  $$('.profile-open').forEach(b=>b.addEventListener('click',()=>openPublicProfile(b.dataset.user)));
-}
-function openPublicProfile(username){
-  const u=getUsers().find(x=>x.username.toLowerCase()===username.toLowerCase());
-  if(!u){alert('That creator profile is only a demo profile in this prototype.');return;}
-  const links=(u.links||[]).filter(x=>x.enabled!==false);
-  document.body.innerHTML=`<div class="profile-page" style="min-height:100vh;padding:48px 20px;background:radial-gradient(circle at 50% 0%,${esc(u.accent||'#9b6cff')}33,transparent 42%),#09090f;color:#fff;font-family:DM Sans,sans-serif"><div style="max-width:620px;margin:auto;text-align:center"><button id="backHome" class="ghost" style="margin-bottom:28px">← Back</button><img src="https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(u.username)}" style="width:112px;height:112px;border-radius:50%;border:3px solid ${esc(u.accent||'#9b6cff')}" alt=""><h1 style="margin:18px 0 4px">${esc(u.name)} <span class="badge">${esc(u.badge||'✦')}</span></h1><div style="opacity:.65">@${esc(u.username)}</div><p style="opacity:.85;line-height:1.6">${esc(u.bio||'')}</p><div style="display:grid;gap:12px;margin-top:28px">${links.map(l=>`<a href="${esc(l.url)}" target="_blank" rel="noopener" class="link-demo" style="padding:18px;text-decoration:none;color:inherit;background:#ffffff10;border:1px solid #ffffff18;border-radius:16px;display:flex;justify-content:space-between"><b>${esc(l.title)}</b><span>↗</span></a>`).join('')||'<div style="opacity:.6">No links yet.</div>'}</div><div style="margin-top:32px;opacity:.45;font-size:13px">✦ Spider Sense</div></div></div>`;
-  $('#backHome').onclick=()=>location.reload();
-}
-function openAuth(mode){
-  const signup=mode==='signup';
-  $('#modalTitle').textContent=signup?'Create your Spider Sense':'Welcome back';
-  $('#modalText').textContent=signup?'Create one account and claim your unique username.':'Sign in to manage your profile.';
-  const modal=$('#modal');
-  modal.querySelectorAll('.auth-extra').forEach(x=>x.remove());
-  const email=modal.querySelector('input[type="email"]');
-  const password=modal.querySelector('input[type="password"]');
-  const button=modal.querySelector('.primary.full');
-  email.value=''; password.value='';
-  if(signup){
-    const username=document.createElement('input'); username.className='modal-input auth-extra'; username.placeholder='Username (letters, numbers, _)'; username.id='authUsername'; username.autocomplete='username'; email.parentNode.insertBefore(username,email);
-    const name=document.createElement('input'); name.className='modal-input auth-extra'; name.placeholder='Display name'; name.id='authName'; email.parentNode.insertBefore(name,email);
-  }
-  button.textContent=signup?'Create account':'Sign in';
-  button.onclick=()=>handleAuth(signup);
-  modal.classList.add('show');
-}
-function handleAuth(signup){
-  const modal=$('#modal');
-  const email=modal.querySelector('input[type="email"]').value.trim().toLowerCase();
-  const password=modal.querySelector('input[type="password"]').value;
-  if(!email||!password||!email.includes('@'))return alert('Enter a valid email and password.');
-  const users=getUsers();
-  if(signup){
-    const username=$('#authUsername').value.trim().toLowerCase();
-    const name=$('#authName').value.trim()||username;
-    if(!/^[a-z0-9_]{3,24}$/.test(username))return alert('Username must be 3–24 characters: letters, numbers or _.');
-    if(users.some(u=>u.email===email))return alert('An account already exists for this email. Please sign in.');
-    if(users.some(u=>u.username===username))return alert('That username is already taken.');
-    const u={id:crypto.randomUUID(),email,password,name,username,bio:'creator on Spider Sense ✦',accent:'#9b6cff',badge:'✦',links:[],createdAt:Date.now(),role:email===OWNER_EMAIL?'owner':'user'};
-    users.push(u);saveUsers(users);setCurrent({id:u.id,email:u.email,username:u.username,role:u.role});modal.classList.remove('show');loadUserIntoDashboard();show('dashboard');alert('Account created! Your username is @'+u.username);
-  }else{
-    const u=users.find(x=>x.email===email&&x.password===password);
-    if(!u)return alert('Incorrect email or password.');
-    setCurrent({id:u.id,email:u.email,username:u.username,role:u.role});modal.classList.remove('show');loadUserIntoDashboard();show('dashboard');
-  }
-}
+function show(view){$$('.view').forEach(v=>v.classList.remove('active'));const el=$('#'+view);if(el){el.classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}}
+function creatorList(){return [...getUsers().map(u=>({name:u.name,handle:'@'+u.username,bio:u.bio||'creator on Spider Sense',seed:u.username,badge:u.badge||'✦',tag:'creator'})),...DEMO_CREATORS];}
+function renderCreators(list=creatorList()){$('#creatorGrid').innerHTML=list.map(c=>`<article class="creator"><div class="creator-top"><img src="https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(c.seed)}" alt=""><div><h3>${esc(c.name)} <span class="badge">${esc(c.badge)}</span></h3><small>${esc(c.handle)}</small></div></div><p>${esc(c.bio)}</p><button class="link-demo profile-open" data-user="${esc(c.handle.slice(1))}">Visit profile <span>↗</span></button></article>`).join('')||'<p>No creators found.</p>';$$('.profile-open').forEach(b=>b.onclick=()=>openPublicProfile(b.dataset.user));}
+function openPublicProfile(username){const u=getUsers().find(x=>x.username.toLowerCase()===username.toLowerCase());if(!u){alert('Demo profile — create an account to publish your own page.');return;}u.views=(u.views||0)+1;persistUser(u);const links=(u.links||[]).filter(x=>x.enabled!==false);const sections=(u.sections||defaultSections()).filter(x=>x.enabled!==false);document.body.innerHTML=`<div class="profile-page" style="--profile-accent:${esc(u.accent||'#9b6cff')}"><div class="public-tools"><button id="backHome" class="ghost">← Back</button><button id="shareProfile" class="ghost">Share ↗</button></div><main class="public-card"><div class="public-cover" style="background-image:url('${esc(u.image||'')}')"></div><img class="public-avatar" src="https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(u.username)}" alt=""><h1>${esc(u.name)} <span class="badge verified">✓</span></h1><div class="public-handle">@${esc(u.username)} ${u.location?`· ${esc(u.location)}`:''}</div><p class="public-bio">${esc(u.bio||'')}</p><div class="public-socials">◎ ◈ 𝕏 ◉ ♪</div>${sections.map(s=>`<section class="public-section"><h3>${esc(s.title)}</h3>${s.type==='about'?`<p>${esc(u.about||u.bio||'')}</p>`:s.type==='links'?`<div class="public-links">${links.map((l,i)=>`<a href="${esc(l.url)}" target="_blank" rel="noopener" data-click="${i}"><b>${esc(l.title)}</b><span>↗</span></a>`).join('')||'<p>No links yet.</p>'}</div>`:s.type==='media'?`<div class="media-box">♫ ${u.audio?'Audio attached':'Media section ready'}</div>`:`<p>${esc(s.content||'Add content from your dashboard.')}</p>`}</section>`).join('')}<div class="public-brand">✦ Spider Sense</div></main></div>`;$('#backHome').onclick=()=>location.reload();$('#shareProfile').onclick=async()=>{const url=location.href;try{await navigator.clipboard.writeText(url);alert('Profile URL copied!')}catch{prompt('Copy your profile URL:',url)}};$$('[data-click]').forEach(a=>a.onclick=()=>{const n=Number(a.dataset.click);u.clicks=(u.clicks||0)+1;u.links[n]&&(u.links[n].clicks=(u.links[n].clicks||0)+1);persistUser(u);});}
+function defaultSections(){return[{id:'about',title:'About me',type:'about',enabled:true},{id:'links',title:'My links',type:'links',enabled:true},{id:'media',title:'Media',type:'media',enabled:true}];}
+function openAuth(mode){const signup=mode==='signup';$('#modalTitle').textContent=signup?'Create your Spider Sense':'Welcome back';$('#modalText').textContent=signup?'Claim your username and start building.':'Sign in to manage your creator studio.';$('#authUsername').style.display=signup?'block':'none';$('#authName').style.display=signup?'block':'none';$('#authSubmit').textContent=signup?'Create account':'Sign in';$('#authSubmit').onclick=()=>handleAuth(signup);['authUsername','authName','authEmail','authPassword'].forEach(id=>$(('#'+id)).value='');$('#modal').classList.add('show');}
+function handleAuth(signup){const email=$('#authEmail').value.trim().toLowerCase(),password=$('#authPassword').value,users=getUsers();if(!email||!password||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return alert('Enter a valid email and password.');if(signup){const username=$('#authUsername').value.trim().toLowerCase(),name=$('#authName').value.trim()||username;if(!/^[a-z0-9_]{3,24}$/.test(username))return alert('Username: 3–24 letters, numbers or _.');if(users.some(u=>u.email===email))return alert('Email already registered.');if(users.some(u=>u.username===username))return alert('Username already taken.');const u={id:crypto.randomUUID(),email,password,name,username,bio:'creator on Spider Sense ✦',about:'',location:'',accent:'#9b6cff',badge:'✦',links:[],sections:defaultSections(),views:0,clicks:0,followers:0,public:true,motion:true,opacity:92,blur:12,createdAt:Date.now(),role:email===OWNER_EMAIL?'owner':'user'};users.push(u);saveUsers(users);setCurrent({id:u.id,email:u.email,username:u.username,role:u.role});$('#modal').classList.remove('show');loadUserIntoDashboard();show('dashboard');return alert('Account created! @'+u.username);}const u=users.find(x=>x.email===email&&x.password===password);if(!u)return alert('Incorrect email or password.');setCurrent({id:u.id,email:u.email,username:u.username,role:u.role});$('#modal').classList.remove('show');loadUserIntoDashboard();show('dashboard');}
 function getCurrentUser(){const c=current();return c?getUsers().find(u=>u.id===c.id):null;}
-function loadUserIntoDashboard(){
-  const u=getCurrentUser(); if(!u)return;
-  if($('#nameInput'))$('#nameInput').value=u.name;
-  if($('#bioInput'))$('#bioInput').value=u.bio;
-  if($('#previewName'))$('#previewName').textContent=u.name;
-  if($('#previewBio'))$('#previewBio').textContent=u.bio;
-  document.documentElement.style.setProperty('--accent',u.accent||'#9b6cff');
-  renderLinkManager();
-}
-function saveProfile(){
-  const u=getCurrentUser(); if(!u)return alert('Sign in first.');
-  u.name=$('#nameInput').value.trim()||u.name;u.bio=$('#bioInput').value.trim();
-  const active=$('.swatch.active'); if(active)u.accent=active.dataset.accent;
-  const users=getUsers().map(x=>x.id===u.id?u:x);saveUsers(users);loadUserIntoDashboard();
-  const b=$('#saveProfile');if(b){const old=b.textContent;b.textContent='✓ Saved';setTimeout(()=>b.textContent=old,1200);}
-}
-function renderLinkManager(){
-  const panel=$('#linkManager'); if(!panel)return; const u=getCurrentUser(); if(!u)return;
-  panel.innerHTML=`<div class="panel-title"><b>Link manager</b><button class="primary" id="addLink">+ Add link</button></div><div id="linksList"></div>`;
-  const list=$('#linksList');
-  (u.links||[]).forEach((l,i)=>{const row=document.createElement('div');row.className='user-row';row.innerHTML=`<div style="flex:1"><input class="modal-input" value="${esc(l.title)}" data-title="${i}"><input class="modal-input" value="${esc(l.url)}" data-url="${i}"></div><button class="ghost" data-up="${i}">↑</button><button class="ghost" data-down="${i}">↓</button><button class="ghost" data-del="${i}">Delete</button>`;list.appendChild(row);});
-  if(!u.links.length)list.innerHTML='<p style="opacity:.6">No links yet. Add your first link.</p>';
-  $('#addLink').onclick=()=>{u.links.push({title:'New link',url:'https://example.com'});persistUser(u);renderLinkManager();};
-  $$('[data-title]').forEach(x=>x.onchange=()=>{u.links[+x.dataset.title].title=x.value;persistUser(u)});
-  $$('[data-url]').forEach(x=>x.onchange=()=>{u.links[+x.dataset.url].url=x.value;persistUser(u)});
-  $$('[data-del]').forEach(x=>x.onclick=()=>{u.links.splice(+x.dataset.del,1);persistUser(u);renderLinkManager()});
-  $$('[data-up]').forEach(x=>x.onclick=()=>moveLink(u,+x.dataset.up,-1));
-  $$('[data-down]').forEach(x=>x.onclick=()=>moveLink(u,+x.dataset.down,1));
-}
-function moveLink(u,i,d){const j=i+d;if(j<0||j>=u.links.length)return;[u.links[i],u.links[j]]=[u.links[j],u.links[i]];persistUser(u);renderLinkManager();}
 function persistUser(u){saveUsers(getUsers().map(x=>x.id===u.id?u:x));}
-
+function loadUserIntoDashboard(){const u=getCurrentUser();if(!u)return;if($('#nameInput'))$('#nameInput').value=u.name;if($('#bioInput'))$('#bioInput').value=u.bio;if($('#previewName'))$('#previewName').textContent=u.name;if($('#previewBio'))$('#previewBio').textContent=u.bio;if($('#usernameView'))$('#usernameView').value='@'+u.username;if($('#locationInput'))$('#locationInput').value=u.location||'';if($('#aboutInput'))$('#aboutInput').value=u.about||'';if($('#opacityInput'))$('#opacityInput').value=u.opacity??92;if($('#blurInput'))$('#blurInput').value=u.blur??12;if($('#imageInput'))$('#imageInput').value=u.image||'';if($('#audioInput'))$('#audioInput').value=u.audio||'';if($('#videoInput'))$('#videoInput').value=u.video||'';document.documentElement.style.setProperty('--accent',u.accent||'#9b6cff');$('#metricViews').textContent=(u.views||0).toLocaleString();$('#metricClicks').textContent=(u.clicks||0).toLocaleString();$('#metricFollowers').textContent=(u.followers||0).toLocaleString();$('#analyticsViews').textContent=(u.views||0).toLocaleString();$('#analyticsClicks').textContent=(u.clicks||0).toLocaleString();renderLinkManager();renderSections();renderAdmin();}
+function saveProfile(){const u=getCurrentUser();if(!u)return alert('Sign in first.');u.name=$('#nameInput').value.trim()||u.name;u.bio=$('#bioInput').value.trim();const s=$('.swatch.active');if(s)u.accent=s.dataset.accent;persistUser(u);loadUserIntoDashboard();flash('#saveProfile','✓ Saved');}
+function renderLinkManager(){const panel=$('#linkManager');if(!panel)return;const u=getCurrentUser();if(!u)return;panel.innerHTML=`<div class="panel-title"><b>Link manager</b><button class="primary" id="addLink">+ Add link</button></div><div id="linksList"></div>`;const list=$('#linksList');(u.links||[]).forEach((l,i)=>{const row=document.createElement('div');row.className='link-editor-row';row.innerHTML=`<input value="${esc(l.title)}" data-title="${i}"><input value="${esc(l.url)}" data-url="${i}"><button class="ghost" data-up="${i}">↑</button><button class="ghost" data-down="${i}">↓</button><button class="ghost" data-del="${i}">Delete</button>`;list.appendChild(row);});if(!u.links.length)list.innerHTML='<p class="muted">No links yet. Add your first link.</p>';$('#addLink').onclick=()=>{u.links.push({title:'New link',url:'https://example.com',enabled:true,clicks:0});persistUser(u);renderLinkManager();};$$('[data-title]').forEach(x=>x.onchange=()=>{u.links[+x.dataset.title].title=x.value;persistUser(u)});$$('[data-url]').forEach(x=>x.onchange=()=>{u.links[+x.dataset.url].url=x.value;persistUser(u)});$$('[data-del]').forEach(x=>x.onclick=()=>{u.links.splice(+x.dataset.del,1);persistUser(u);renderLinkManager()});$$('[data-up]').forEach(x=>x.onclick=()=>moveLink(u,+x.dataset.up,-1));$$('[data-down]').forEach(x=>x.onclick=()=>moveLink(u,+x.dataset.down,1));}
+function moveLink(u,i,d){const j=i+d;if(j<0||j>=u.links.length)return;[u.links[i],u.links[j]]=[u.links[j],u.links[i]];persistUser(u);renderLinkManager();}
+function renderSections(){const box=$('#sectionManager'),u=getCurrentUser();if(!box||!u)return;u.sections=u.sections||defaultSections();box.innerHTML=u.sections.map((s,i)=>`<div class="section-row"><span>☷</span><div><b>${esc(s.title)}</b><small>${esc(s.type)}</small></div><button class="ghost" data-sec-up="${i}">↑</button><button class="ghost" data-sec-down="${i}">↓</button><button class="toggle ${s.enabled?'on':''}" data-sec-toggle="${i}">${s.enabled?'ON':'OFF'}</button><button class="ghost" data-sec-del="${i}">×</button></div>`).join('');$$('[data-sec-up]').forEach(x=>x.onclick=()=>moveSection(u,+x.dataset.secUp,-1));$$('[data-sec-down]').forEach(x=>x.onclick=()=>moveSection(u,+x.dataset.secDown,1));$$('[data-sec-toggle]').forEach(x=>x.onclick=()=>{u.sections[+x.dataset.secToggle].enabled=!u.sections[+x.dataset.secToggle].enabled;persistUser(u);renderSections()});$$('[data-sec-del]').forEach(x=>x.onclick=()=>{u.sections.splice(+x.dataset.secDel,1);persistUser(u);renderSections()});}
+function moveSection(u,i,d){const j=i+d;if(j<0||j>=u.sections.length)return;[u.sections[i],u.sections[j]]=[u.sections[j],u.sections[i]];persistUser(u);renderSections();}
+function saveIdentity(){const u=getCurrentUser();if(!u)return;u.location=$('#locationInput').value.trim();u.about=$('#aboutInput').value.trim();persistUser(u);flash('#saveIdentity','✓ Saved');}
+function saveAppearance(){const u=getCurrentUser();if(!u)return;u.opacity=+$('#opacityInput').value;u.blur=+$('#blurInput').value;u.motion=$('#motionToggle').textContent==='ON';u.monochrome=$('#iconsToggle').textContent==='ON';persistUser(u);flash('#saveAppearance','✓ Saved');}
+function saveMedia(){const u=getCurrentUser();if(!u)return;u.image=$('#imageInput').value.trim();u.audio=$('#audioInput').value.trim();u.video=$('#videoInput').value.trim();persistUser(u);flash('#saveMedia','✓ Saved');}
+function flash(sel,text){const b=$(sel);if(!b)return;const old=b.textContent;b.textContent=text;setTimeout(()=>b.textContent=old,1200);}
+function renderAdmin(filter=''){const u=getCurrentUser();if(!u||u.email!==OWNER_EMAIL)return;const users=getUsers().filter(x=>(x.username+x.email+x.name).toLowerCase().includes(filter.toLowerCase()));$('#adminUsers').textContent=getUsers().length;$('#adminActive').textContent=getUsers().filter(x=>Date.now()-x.createdAt<86400000).length;$('#adminUsersList').innerHTML=users.map(x=>`<div class="user-row"><div class="user"><span class="tiny-avatar">${esc(x.name.slice(0,1).toUpperCase())}</span><div><b>${esc(x.name)}</b><small>@${esc(x.username)}</small></div></div><span class="status live">${x.public===false?'Private':'Active'}</span><span class="badge">${esc(x.role)}</span><button class="ghost" data-remove-user="${esc(x.id)}">Remove</button></div>`).join('')||'<p class="muted">No users.</p>';$$('[data-remove-user]').forEach(b=>b.onclick=()=>{if(confirm('Remove this local account?')){saveUsers(getUsers().filter(x=>x.id!==b.dataset.removeUser));renderAdmin();}});}
+function switchPanel(name){$$('.dashboard-panel').forEach(p=>p.classList.add('hidden'));$('#panel-'+name)?.classList.remove('hidden');$$('.side-link').forEach(x=>x.classList.remove('active'));document.querySelector(`.side-link[data-panel="${name}"]`)?.classList.add('active');$('#dashHeading').textContent=name.charAt(0).toUpperCase()+name.slice(1);}
 renderCreators();
-$$('[data-view]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.view;if(v==='dashboard'){loadUserIntoDashboard();}show(v)}));
-$$('[data-modal]').forEach(b=>b.addEventListener('click',()=>openAuth(b.dataset.modal)));
-$('#closeModal').onclick=()=>$('#modal').classList.remove('show');
-$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('show')};
+$$('[data-view]').forEach(b=>b.onclick=()=>{if(b.dataset.view==='dashboard'){if(!getCurrentUser())return openAuth('login');loadUserIntoDashboard();}show(b.dataset.view)});
+$$('[data-modal]').forEach(b=>b.onclick=()=>openAuth(b.dataset.modal));
+$('#closeModal').onclick=()=>$('#modal').classList.remove('show');$('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('show')};
 $('#search').oninput=e=>{const q=e.target.value.toLowerCase();renderCreators(creatorList().filter(c=>(c.name+c.handle+c.bio).toLowerCase().includes(q)))};
-$('#nameInput').oninput=e=>$('#previewName').textContent=e.target.value||'Spider';
-$('#bioInput').oninput=e=>$('#previewBio').textContent=e.target.value||'Your bio goes here';
+$$('.filter').forEach(f=>f.onclick=()=>{$$('.filter').forEach(x=>x.classList.remove('active'));f.classList.add('active');const q=f.dataset.filter;renderCreators(q==='all'?creatorList():creatorList().filter(c=>c.tag===q));});
+$('#nameInput').oninput=e=>$('#previewName').textContent=e.target.value||'Creator';$('#bioInput').oninput=e=>$('#previewBio').textContent=e.target.value||'Your bio goes here';$('#saveProfile').onclick=saveProfile;$('#saveIdentity').onclick=saveIdentity;$('#saveAppearance').onclick=saveAppearance;$('#saveMedia').onclick=saveMedia;
 $$('.swatch').forEach(s=>s.onclick=()=>{$$('.swatch').forEach(x=>x.classList.remove('active'));s.classList.add('active');document.documentElement.style.setProperty('--accent',s.dataset.accent)});
-$('#saveProfile').onclick=saveProfile;
-$$('.side-link').forEach(btn=>btn.addEventListener('click',()=>{
-  if(btn.classList.contains('admin')){const u=getCurrentUser();if(!u||u.email!==OWNER_EMAIL)return alert('Owner access only.');show('admin');return;}
-  $$('.side-link').forEach(x=>x.classList.remove('active'));btn.classList.add('active');
-  const label=btn.textContent.toLowerCase();
-  if(label.includes('profile'))document.querySelector('#nameInput')?.focus();
-  if(label.includes('links'))document.querySelector('#linkManager')?.scrollIntoView({behavior:'smooth'});
-}));
-
-(function initDashboardEnhancements(){
-  const editor=document.querySelector('.editor-grid');
-  if(editor&&!$('#linkManager')){const p=document.createElement('div');p.id='linkManager';p.className='panel';p.style.marginTop='18px';editor.parentNode.appendChild(p);}
-  const user=current();
-  if(user)loadUserIntoDashboard();
-})();
+$('#addSection').onclick=()=>{const u=getCurrentUser();if(!u)return;u.sections=u.sections||defaultSections();u.sections.push({id:crypto.randomUUID(),title:'Custom section',type:'custom',content:'Your custom content ✦',enabled:true});persistUser(u);renderSections();};
+$$('.side-link[data-panel]').forEach(b=>b.onclick=()=>switchPanel(b.dataset.panel));
+$('#motionToggle').onclick=e=>e.currentTarget.textContent=e.currentTarget.textContent==='ON'?'OFF':'ON';$('#iconsToggle').onclick=e=>e.currentTarget.textContent=e.currentTarget.textContent==='ON'?'OFF':'ON';$('#publicToggle').onclick=e=>{const u=getCurrentUser();if(!u)return;e.currentTarget.textContent=e.currentTarget.textContent==='ON'?'OFF':'ON';u.public=e.currentTarget.textContent==='ON';persistUser(u)};$('#counterToggle').onclick=e=>e.currentTarget.textContent=e.currentTarget.textContent==='ON'?'OFF':'ON';
+$('#logoutBtn').onclick=()=>{setCurrent(null);alert('Signed out.');show('home');};$('#copyProfile').onclick=async()=>{const u=getCurrentUser();if(!u)return;const url=location.href.split('#')[0]+'?u='+encodeURIComponent(u.username);try{await navigator.clipboard.writeText(url);flash('#copyProfile','✓ Copied')}catch{prompt('Profile URL:',url)}};$('#adminSearch').oninput=e=>renderAdmin(e.target.value);
+$('#themeToggle').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('spiderSenseTheme',document.body.classList.contains('light')?'light':'dark');};if(localStorage.getItem('spiderSenseTheme')==='light')document.body.classList.add('light');
+(function init(){const u=getCurrentUser();if(u)loadUserIntoDashboard();})();
