@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Spider Sense — Creator Profiles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <nav class="topbar">
+    <a class="brand" href="#"><span class="brand-mark">✦</span> Spider Sense</a>
+    <div class="nav-actions">
+      <button class="ghost" data-view="explore">Explore</button>
+      <button class="ghost" data-view="dashboard">Dashboard</button>
+      <button class="primary" data-modal="login">Sign in</button>
+    </div>
+  </nav>
+
+  <main id="app">
+    <section class="hero view active" id="home">
+      <div class="hero-copy">
+        <div class="eyebrow">YOUR IDENTITY, YOUR SPACE</div>
+        <h1>Build a profile<br><span>people remember.</span></h1>
+        <p>One beautiful page for your links, socials, music, personality and everything you want to share.</p>
+        <div class="hero-actions"><button class="primary large" data-modal="signup">Create your page</button><button class="secondary large" data-view="explore">Discover creators</button></div>
+        <div class="mini-stats"><div><b>∞</b><span>custom links</span></div><div><b>24/7</b><span>your profile</span></div><div><b>100%</b><span>your style</span></div></div>
+      </div>
+      <div class="profile-preview">
+        <div class="preview-glow"></div>
+        <div class="preview-card">
+          <div class="preview-cover"></div>
+          <div class="preview-body">
+            <div class="avatar-wrap"><img src="https://api.dicebear.com/9.x/glass/svg?seed=Spider" alt="Preview avatar"><span class="online-dot"></span></div>
+            <div class="name-row"><h3>spider</h3><span class="badge verified">✓</span><span class="badge star">★</span></div>
+            <p class="handle">@spider</p><p class="bio">designer • creator • internet person<br>building cool things ✦</p>
+            <div class="socials"><span>◎</span><span>◈</span><span>𝕏</span><span>◉</span><span>♪</span></div>
+            <div class="link-demo"><b>My latest project</b><span>↗</span></div><div class="link-demo"><b>Everything I make</b><span>↗</span></div>
+            <div class="now-playing"><span class="disc">♫</span><div><small>NOW PLAYING</small><b>Midnight City</b></div><span>Ⅱ</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section view" id="explore">
+      <div class="section-head"><div><div class="eyebrow">DISCOVER</div><h2>Find your people.</h2></div><input id="search" class="search" placeholder="Search creators..." /></div>
+      <div class="creator-grid" id="creatorGrid"></div>
+    </section>
+
+    <section class="section view" id="dashboard">
+      <div class="dashboard-shell">
+        <aside class="side"><div class="side-brand">✦ <b>Spider Sense</b></div><button class="side-link active">▦ Overview</button><button class="side-link">✎ Profile</button><button class="side-link">↗ Links</button><button class="side-link">◈ Appearance</button><button class="side-link">♫ Media</button><button class="side-link">⌁ Analytics</button><button class="side-link">★ Badges</button><button class="side-link">⚙ Settings</button><div class="side-bottom"><button class="side-link admin">♛ Admin panel</button></div></aside>
+        <div class="dash-main"><div class="dash-top"><div><div class="eyebrow">WELCOME BACK</div><h2>Your profile</h2></div><button class="primary" data-view="home">View public page ↗</button></div>
+          <div class="metric-grid"><div class="metric"><span>Profile views</span><strong>12,482</strong><small>+18.4% this week</small></div><div class="metric"><span>Link clicks</span><strong>3,921</strong><small>+11.2% this week</small></div><div class="metric"><span>Followers</span><strong>846</strong><small>+42 this month</small></div><div class="metric"><span>Profile score</span><strong>94%</strong><small>Looking great ✦</small></div></div>
+          <div class="editor-grid"><div class="panel"><div class="panel-title"><b>Quick edit</b><span>Saved automatically</span></div><label>Display name<input id="nameInput" value="Spider" /></label><label>Bio<textarea id="bioInput">designer • creator • internet person</textarea></label><label>Accent color<div class="swatches"><button class="swatch active" data-accent="#9b6cff"></button><button class="swatch" data-accent="#22d3ee"></button><button class="swatch" data-accent="#fb7185"></button><button class="swatch" data-accent="#a3e635"></button></div></label><button class="primary full" id="saveProfile">Save changes</button></div><div class="panel"><div class="panel-title"><b>Profile preview</b><span>Live</span></div><div class="live-preview"><div class="live-avatar"><img id="dashAvatar" src="https://api.dicebear.com/9.x/glass/svg?seed=Spider"></div><h3 id="previewName">Spider</h3><p id="previewBio">designer • creator • internet person</p><div class="live-link">My latest project <span>↗</span></div><div class="live-link">Everything I make <span>↗</span></div></div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section view" id="admin">
+      <div class="dash-top"><div><div class="eyebrow">OWNER CONSOLE</div><h2>Admin center</h2></div><span class="admin-pill">OWNER</span></div>
+      <div class="admin-grid"><div class="admin-card"><span>Total users</span><b>8,421</b></div><div class="admin-card"><span>Active today</span><b>1,284</b></div><div class="admin-card"><span>Reports</span><b>7</b></div><div class="admin-card"><span>Badges issued</span><b>2,913</b></div></div>
+      <div class="panel"><div class="panel-title"><b>User management</b><input class="small-search" placeholder="Search users"></div><div class="user-row"><div class="user"><span class="tiny-avatar">A</span><div><b>aarav</b><small>@aarav</small></div></div><span class="status live">Active</span><span class="badge verified">✓ Verified</span><button class="ghost">Manage</button></div><div class="user-row"><div class="user"><span class="tiny-avatar">S</span><div><b>spider</b><small>@spider</small></div></div><span class="status live">Active</span><span class="badge star">★ Creator</span><button class="ghost">Manage</button></div><div class="user-row"><div class="user"><span class="tiny-avatar">N</span><div><b>nova</b><small>@nova</small></div></div><span class="status">Away</span><span class="badge">PRO</span><button class="ghost">Manage</button></div></div>
+      <div class="panel"><div class="panel-title"><b>Badge studio</b><button class="primary">Create badge</button></div><div class="badge-list"><div class="custom-badge"><span class="badge verified">✓</span><div><b>Verified</b><small>Identity confirmed</small></div></div><div class="custom-badge"><span class="badge star">★</span><div><b>Creator</b><small>Featured creators</small></div></div><div class="custom-badge"><span class="badge founder">✦</span><div><b>Founder</b><small>Early community member</small></div></div></div></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modal"><div class="modal"><button class="close" id="closeModal">×</button><div class="modal-icon">✦</div><h2 id="modalTitle">Welcome to Spider Sense</h2><p id="modalText">Create your creator page in minutes.</p><input class="modal-input" placeholder="Email address" type="email"><input class="modal-input" placeholder="Password" type="password"><button class="primary full">Continue</button><small>By continuing, you agree to our terms.</small></div></div>
+  <footer><span>✦ Spider Sense</span><span>Build your corner of the internet.</span><span>© 2026</span></footer>
+  <script src="app.js"></script>
+</body>
+</html>
